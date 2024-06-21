@@ -1,6 +1,7 @@
-using System.Collections;
-using System.Collections.Generic;
-using TMPro;
+/*The ScoreManager class in Unity manages the scoring and level progression for a game. 
+It includes properties for score and level, which track the player's current score and 
+level respectively. The class updates these values on the UI using Text components for score, 
+level, and lines cleared.*/
 using UnityEngine;
 using UnityEngine.UI;
 

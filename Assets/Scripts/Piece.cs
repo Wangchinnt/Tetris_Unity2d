@@ -1,9 +1,10 @@
-using System.Collections;
+// This class is responsible for managing the tetromino pieces, 
+// including process the logic of their movement, rotation, and locking and
+// handling touch input for the game.
+
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.UIElements;
-using UnityEngine.XR;
 
 public class Piece : MonoBehaviour
 {
@@ -124,7 +125,7 @@ public class Piece : MonoBehaviour
         EventSystem.current.RaycastAll(eventData, results);
         return results.Count > 0;
     }
-    
+
     private void DetectSwipeGesture()
     {
         // Distance swiped 

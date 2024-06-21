@@ -1,5 +1,6 @@
-using System.Drawing;
-using System.Numerics;
+// Abstract class for Tetrominoes
+
+
 using UnityEngine;
 using UnityEngine.Tilemaps;
 

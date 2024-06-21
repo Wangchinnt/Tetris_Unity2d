@@ -11,7 +11,7 @@ public class AudioManager : MonoBehaviour
     [SerializeField] AudioSource SFXSource;
 
     [Header("---- Audio Clips ----")]
-    public AudioClip backgroundMusicClip;
+    public AudioClip backgroundMusic;
     public AudioClip lineClearSound;
     public AudioClip rotateSound;
     public AudioClip hardDropSound;
@@ -41,9 +41,9 @@ public class AudioManager : MonoBehaviour
 
     public void PlayBackgroundMusic()
     {
-        if (isMusicOn && musicSource.clip != backgroundMusicClip)
+        if (isMusicOn && musicSource.clip != backgroundMusic)
         {
-            musicSource.clip = backgroundMusicClip;
+            musicSource.clip = backgroundMusic;
             musicSource.loop = true;
             musicSource.Play();
         }

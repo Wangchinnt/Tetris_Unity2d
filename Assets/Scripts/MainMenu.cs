@@ -1,5 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
+/* This class for manage the UI element in Main menu*/
 using UnityEngine;
 
 public class MainMenu : MonoBehaviour

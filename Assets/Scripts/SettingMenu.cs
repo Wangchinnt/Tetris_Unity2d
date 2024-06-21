@@ -1,3 +1,4 @@
+/* This class for manage the UI element in Setting Menu*/
 using UnityEngine;
 using UnityEngine.UI;
 

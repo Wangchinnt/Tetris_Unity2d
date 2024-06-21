@@ -1,5 +1,5 @@
-using System.Collections;
-using System.Collections.Generic;
+/* This class for manage the UI element in Pause Menu*/
+
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -18,7 +18,7 @@ public class PauseMenu : MonoBehaviour
         pauseMenuUI.SetActive(false);
         Time.timeScale = 1f;
     }
-    
+
     
     public void Home()
     {

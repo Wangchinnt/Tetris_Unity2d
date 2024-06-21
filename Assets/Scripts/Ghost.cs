@@ -1,3 +1,10 @@
+/* The Ghost script in Unity manages the visual representation of a ghost piece in a tile-based game. 
+It uses a Tilemap component to render the ghost piece and calculates where the active piece will land. 
+During LateUpdate, it clears the previous ghost position,copies the current piece's state, 
+drops the ghost to the lowest valid position, and sets its tiles on the board. 
+This script ensures players can preview where their pieces will fall, 
+enhancing gameplay clarity and strategy.*/
+
 using UnityEngine;
 using UnityEngine.Tilemaps;
 

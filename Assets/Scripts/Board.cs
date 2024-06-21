@@ -1,16 +1,17 @@
-using System.Collections;
+
+// This script is responsible for managing the game board, 
+// including spawning and moving pieces, checking for valid positions, clearing lines,
+// and holding tetrominoes.
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.SocialPlatforms.Impl;
 using UnityEngine.Tilemaps;
 using UnityEngine.UI;
 
 public class Board : MonoBehaviour
-{   
+{
     public Tilemap tilemap { get; private set; }
     public Piece activePiece { get; private set; }
-    public  Vector2Int boardSize { get; private set; } = new Vector2Int(10, 20);
+    public Vector2Int boardSize { get; private set; } = new Vector2Int(10, 20);
     public TetrominoData[] tetrominoes;
 
     [SerializeField] Tilemap nextTetrominoTilemap;
@@ -21,7 +22,7 @@ public class Board : MonoBehaviour
     [SerializeField] Text lastScoreText;
 
     private int yOffSet = 4;
-    private Vector3Int spawnPosition= new Vector3Int(-1, 8, 0);
+    private Vector3Int spawnPosition = new Vector3Int(-1, 8, 0);
     private Queue<TetrominoData> nextTetrominoQueue = new Queue<TetrominoData>();
     private int queueSize = 3;
 
@@ -50,7 +51,7 @@ public class Board : MonoBehaviour
     }
 
     private void Start()
-    {   
+    {
         InitializeQueue();
         // Wait 2 seconds before spawning the first piece
         SpawnPiece();
@@ -64,21 +65,21 @@ public class Board : MonoBehaviour
             newTetromino.Initialize();
             nextTetrominoQueue.Enqueue(newTetromino);
         }
-        UpdateQueueUI();
+        UpdateNextTetrominoUI();
     }
-      private TetrominoData GetRandomTetromino()
+    private TetrominoData GetRandomTetromino()
     {
         int random = Random.Range(0, tetrominoes.Length);
         return tetrominoes[random];
     }
 
     public void SpawnPiece()
-    { 
+    {
         TetrominoData data = nextTetrominoQueue.Dequeue();
         activePiece.Initialize(this, spawnPosition, data);
 
         nextTetrominoQueue.Enqueue(GetRandomTetromino());
-        UpdateQueueUI();
+        UpdateNextTetrominoUI();
 
         if (!IsValidPosition(activePiece, activePiece.position))
         {
@@ -91,18 +92,18 @@ public class Board : MonoBehaviour
     }
 
     private void GameOver()
-    {   
+    {
         this.tilemap.ClearAllTiles();
         Time.timeScale = 0f;
         gameOverPanel.SetActive(true);
-        lastScoreText.text = "Your score: " +FindObjectOfType<ScoreManager>().score.ToString();
+        lastScoreText.text = "Your score: " + FindObjectOfType<ScoreManager>().score.ToString();
     }
 
     public void Set(Piece piece)
     {
         for (int i = 0; i < piece.cells.Length; i++)
         {
-            Vector3Int tilePosition = piece.cells[i] + piece.position; 
+            Vector3Int tilePosition = piece.cells[i] + piece.position;
             tilemap.SetTile(tilePosition, piece.data.tile);
         }
 
@@ -117,12 +118,12 @@ public class Board : MonoBehaviour
         }
     }
 
-    public bool IsValidPosition(Piece piece, Vector3Int position) 
-    {   
+    public bool IsValidPosition(Piece piece, Vector3Int position)
+    {
         RectInt bounds = this.Bounds;
 
         for (int i = 0; i < piece.cells.Length; i++)
-        {   
+        {
             Vector3Int tilePosition = piece.cells[i] + position;
             // Check if the piece is within the bounds of the board
             if (!bounds.Contains((Vector2Int)tilePosition))
@@ -143,17 +144,20 @@ public class Board : MonoBehaviour
         RectInt bounds = this.Bounds;
         int row = bounds.yMin;
         int lineCleared = 0;
-        
+
         // We should use while loop for check when the current row is cleared and the above dropped
         // Clear from bottom to top
         while (row < bounds.yMax)
         {
             // Only advance to the next row if the current is not cleared
             // because the tiles above will fall down when a row is cleared
-            if (IsLineFull(row)) {
+            if (IsLineFull(row))
+            {
                 LineClear(row);
                 lineCleared++;
-            } else {
+            }
+            else
+            {
                 row++;
             }
         }
@@ -202,7 +206,7 @@ public class Board : MonoBehaviour
         }
     }
 
-    private void UpdateQueueUI()
+    private void UpdateNextTetrominoUI()
     {
         nextTetrominoTilemap.ClearAllTiles();
         TetrominoData[] nextTetrominoArray = nextTetrominoQueue.ToArray();
@@ -223,8 +227,10 @@ public class Board : MonoBehaviour
         }
     }
 
+    // This method is called when the player clicks the Hold button.
+    // It will hold the current tetromino and spawn the next one.
     public void HoldTetromino()
-    {   
+    {
         if (!canHold)
         {
             return;
@@ -257,6 +263,7 @@ public class Board : MonoBehaviour
             DisplayTetromino(holdTetrominoTilemap, holdTetromino, Vector3Int.zero);
         }
     }
+
     public void ResetHold()
     {
         canHold = true;
