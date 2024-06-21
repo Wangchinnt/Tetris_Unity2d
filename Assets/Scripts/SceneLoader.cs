@@ -5,10 +5,11 @@ using UnityEngine.UI;
 
 public class SceneLoader : MonoBehaviour
 {
-    public GameObject loadingScreen;
-    public Slider slider;
-    public float minimumLoadingTime = 2f;  // Thời gian tối thiểu cho màn hình loading
+    [SerializeField] GameObject loadingScreen;
+    [SerializeField] Slider slider;
+    const float minimumLoadingTime = 2f; // Minimum loading time in seconds
 
+    // Assign this method to a button click event
     public void LoadScene(int sceneIndex)
     {
         StartCoroutine(LoadAsynchronously(sceneIndex));
@@ -17,8 +18,8 @@ public class SceneLoader : MonoBehaviour
     IEnumerator LoadAsynchronously(int sceneIndex)
     {
         AsyncOperation operation = SceneManager.LoadSceneAsync(sceneIndex);
-        operation.allowSceneActivation = false; // Ngăn cảnh kích hoạt ngay lập tức
-
+        operation.allowSceneActivation = false; // Cause the size of scene is too small, 
+                                                // so we need to wait for a while (fake loading)
         loadingScreen.SetActive(true);
 
         float elapsedTime = 0f;
@@ -28,13 +29,13 @@ public class SceneLoader : MonoBehaviour
             elapsedTime += Time.deltaTime;
             float progress = Mathf.Clamp01(elapsedTime / minimumLoadingTime);
 
-            // Nếu việc load đã hoàn tất và thời gian tối thiểu đã qua, kích hoạt cảnh
+            // If the load is finished, allow the scene activation
             if (operation.progress >= 0.9f && elapsedTime >= minimumLoadingTime)
             {
                 operation.allowSceneActivation = true;
             }
 
-            // Cập nhật thanh trượt với giá trị nhỏ hơn giữa tiến trình thực tế và thời gian đã trôi qua
+            // Update the loading progress
             slider.value = Mathf.Min(progress, Mathf.Clamp01(operation.progress / 0.9f));
 
             yield return null;

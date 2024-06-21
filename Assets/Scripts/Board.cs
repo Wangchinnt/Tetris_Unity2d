@@ -10,12 +10,13 @@ public class Board : MonoBehaviour
 {   
     public Tilemap tilemap { get; private set; }
     public Piece activePiece { get; private set; }
-    public TetrominoData[] tetrominoes;
     public  Vector2Int boardSize { get; private set; } = new Vector2Int(10, 20);
-    public Tilemap nextTetrominoTilemap;
-    public Tilemap holdTetrominoTilemap;  // Assign this in the Unity Inspector
+    public TetrominoData[] tetrominoes;
 
-    public GameObject gameOverPanel;
+    [SerializeField] Tilemap nextTetrominoTilemap;
+    [SerializeField] Tilemap holdTetrominoTilemap;
+
+    [SerializeField] GameObject gameOverPanel;
 
     [SerializeField] Text lastScoreText;
 
@@ -28,7 +29,8 @@ public class Board : MonoBehaviour
     private TetrominoData holdTetromino;
     private bool hasHoldTetromino = false;
     private bool canHold = true;
-    public RectInt Bounds
+
+    private RectInt Bounds
     {
         get
         {
@@ -89,29 +91,12 @@ public class Board : MonoBehaviour
     }
 
     private void GameOver()
-    {
+    {   
         this.tilemap.ClearAllTiles();
         Time.timeScale = 0f;
         gameOverPanel.SetActive(true);
         lastScoreText.text = "Your score: " +FindObjectOfType<ScoreManager>().score.ToString();
     }
-
-    public void ResetGame()
-    {
-        tilemap.ClearAllTiles();
-        nextTetrominoQueue.Clear();
-        nextTetrominoTilemap.ClearAllTiles();
-        holdTetrominoTilemap.ClearAllTiles();
-        holdTetromino = new TetrominoData();
-        hasHoldTetromino = false;
-        canHold = true;
-        gameOverPanel.SetActive(false);
-        InitializeQueue();
-        FindObjectOfType<ScoreManager>().ResetScore();
-        SpawnPiece();
-        Time.timeScale = 1f;
-    }
-
 
     public void Set(Piece piece)
     {
@@ -176,6 +161,7 @@ public class Board : MonoBehaviour
         {
             // Add score based on the number of lines cleared
             FindObjectOfType<ScoreManager>().AddScoreForLine(lineCleared);
+            FindObjectOfType<AudioManager>().PlayLineClearSound();
         }
     }
 
@@ -275,4 +261,5 @@ public class Board : MonoBehaviour
     {
         canHold = true;
     }
+
 }

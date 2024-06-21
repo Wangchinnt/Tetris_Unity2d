@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UIElements;
 using UnityEngine.XR;
 
@@ -11,10 +12,17 @@ public class Piece : MonoBehaviour
     public Vector3Int[] cells { get; private set; }
     public Vector3Int position { get; private set; }
     public int rotationIndex { get; private set; }
-    public float stepDelay = 1f;
-    public float lockDelay = 0.5f;
-    public float hardDropThreshold = 500f;
-    private float swipeThreshold = 50f;  
+
+    [Header("-----------Movement Controls---------")]
+    [SerializeField] float stepDelay = 1f;
+    [SerializeField] float lockDelay = 0.5f;
+
+    [Header("--------------Touch Controls------------")]  
+    [SerializeField] float swipeThreshold = 40f;
+    [SerializeField] float tapThresholdDistance = 10f;
+    [SerializeField] float tapThresholdTime = 0.2f;
+    [SerializeField] float hardDropThreshold = 500f;
+    
     private float stepTime;
     private float lockTime;
     private Vector2 startTouchPosition;
@@ -23,6 +31,9 @@ public class Piece : MonoBehaviour
     private float endTouchTime;
     private bool isTouching = false;
     private bool isSoftDropping = false;
+
+    const float yOffset = 20f;
+
 
     public void Initialize(Board board, Vector3Int position, TetrominoData data)
     {
@@ -49,10 +60,13 @@ public class Piece : MonoBehaviour
         board.Clear(this);
         lockTime += Time.deltaTime;
 
-        HandleTouchInput();
-        if (isSoftDropping)
+        if (Time.timeScale > 0f)
         {
-            SoftDrop();
+            HandleTouchInput();
+            if (isSoftDropping)
+            {
+                SoftDrop();
+            }
         }
 
         if (Time.time > stepTime)
@@ -68,6 +82,11 @@ public class Piece : MonoBehaviour
         if (Input.touchCount > 0)
         {
             Touch touch = Input.GetTouch(0);
+            // Check if the touch is over a UI element
+            if (IsPointerOverUIObject(touch.position))
+            {
+                return; // Ignore this touch if it's over a UI element
+            }
             switch (touch.phase)
             {
                 case TouchPhase.Began:
@@ -97,12 +116,23 @@ public class Piece : MonoBehaviour
         }
     }
 
+     private bool IsPointerOverUIObject(Vector2 touchPosition)
+    {
+        PointerEventData eventData = new PointerEventData(EventSystem.current);
+        eventData.position = touchPosition;
+        List<RaycastResult> results = new List<RaycastResult>();
+        EventSystem.current.RaycastAll(eventData, results);
+        return results.Count > 0;
+    }
+    
     private void DetectSwipeGesture()
     {
+        // Distance swiped 
         Vector2 swipeDelta = endTouchPosition - startTouchPosition;
-
+        // if swipe distance is greater than threshold 
         if (Mathf.Abs(swipeDelta.x) > swipeThreshold || Mathf.Abs(swipeDelta.y) > swipeThreshold)
         {
+            // if horizontal swipe
             if (Mathf.Abs(swipeDelta.x) > Mathf.Abs(swipeDelta.y))
             {
                 if (swipeDelta.x > 0)
@@ -118,9 +148,8 @@ public class Piece : MonoBehaviour
             {
                 if (swipeDelta.y < 0)
                 {
-                    isSoftDropping = true; 
+                    isSoftDropping = true;
                 }
-                // Optional: Handle up swipe if needed
             }
             startTouchPosition = endTouchPosition;
         }
@@ -130,25 +159,26 @@ public class Piece : MonoBehaviour
     {
         Vector2 tapDelta = endTouchPosition - startTouchPosition;
         float tapDuration = endTouchTime - startTouchTime;
-        float tapThresholdDistance = 10f; 
-        float tapThresholdTime = 0.2f; 
         Vector2 swipeVector = endTouchPosition - startTouchPosition;
         float swipeSpeed = swipeVector.magnitude / tapDuration;
 
         if (tapDuration < tapThresholdTime && tapDelta.magnitude < tapThresholdDistance)
         {
-            if (endTouchPosition.x > Screen.width / 2)
+            if (endTouchPosition.y < Screen.height / 2 + yOffset)
             {
-                Rotate(1); 
-            }
-            else
-            {
-                Rotate(-1); 
+                if (endTouchPosition.x >= Screen.width / 2)
+                {
+                    Rotate(1);
+                }
+                else
+                {
+                    Rotate(-1);
+                }
             }
         }
         else if (swipeVector.y < 0 && swipeSpeed > hardDropThreshold)
         {
-            HardDrop(); 
+            HardDrop();
         }
     }
 
@@ -166,24 +196,29 @@ public class Piece : MonoBehaviour
     private void SoftDrop()
     {
         Move(Vector2Int.down);
-        FindAnyObjectByType<ScoreManager>().AddScore(1);
+        if (Move(Vector2Int.down))
+        {
+            FindAnyObjectByType<ScoreManager>().AddScore(1);
+        }
     }
 
     private void HardDrop()
     {
         int dropDistance = 0;
         isSoftDropping = false;
+        FindAnyObjectByType<AudioManager>().PlayHardDropSound();
         while (Move(Vector2Int.down))
         {
             dropDistance++;
         }
-        FindAnyObjectByType<ScoreManager>().AddScore(dropDistance*2);
+        FindAnyObjectByType<ScoreManager>().AddScore(dropDistance * 2);
         Lock();
     }
 
     private void Lock()
-    {   
+    {
         board.Set(this);
+        FindAnyObjectByType<AudioManager>().PlayLockSound();
         board.ClearLines();
         board.SpawnPiece();
         board.ResetHold();
@@ -214,6 +249,8 @@ public class Piece : MonoBehaviour
             rotationIndex = originalRotationIndex;
             ApplyRotationMatrix(-direction);
         }
+        FindAnyObjectByType<AudioManager>().PlayRotateSound();
+
     }
 
     private void ApplyRotationMatrix(int direction)
@@ -282,9 +319,8 @@ public class Piece : MonoBehaviour
         {
             return min + (input - min) % (max - min);
         }
-        
-    }
 
+    }
     public void UpdateSpeed()
     {
         stepDelay = 1f - (FindAnyObjectByType<ScoreManager>().level - 1) * 0.1f;

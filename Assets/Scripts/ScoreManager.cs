@@ -10,9 +10,9 @@ public class ScoreManager : MonoBehaviour
     public int score { get; private set;} = 0;
     public int level { get; private set;} = 1; 
 
-    public Text levelText;
-    public Text linesText;
-    public Text scoreText;
+    [SerializeField] Text levelText;
+    [SerializeField] Text linesText;
+    [SerializeField] Text scoreText;
    
     private int linePerLevel = 10;
 
@@ -30,6 +30,15 @@ public class ScoreManager : MonoBehaviour
         linePerLevel += (10-level);
         // Update stepDelay and lockDelay in Piece.cs
         FindAnyObjectByType<Piece>().UpdateSpeed();
+    }
+
+    
+    private void UpdateScoreUI()
+    {
+        // Update the UI with the new score
+        scoreText.text = score.ToString();
+        levelText.text = level.ToString();
+        linesText.text = lineCleared.ToString();
     }
 
     public void AddScore(int value)
@@ -52,6 +61,7 @@ public class ScoreManager : MonoBehaviour
                 score += 500;
                 break;
             case 4:
+                FindAnyObjectByType<AudioManager>().PlayTetrisSound();
                 score += 800;
                 break;
         }
@@ -60,22 +70,6 @@ public class ScoreManager : MonoBehaviour
         {
             LevelUp();
         }
-        UpdateScoreUI();
-    }
-
-    private void UpdateScoreUI()
-    {
-        // Update the UI with the new score
-        scoreText.text = score.ToString();
-        levelText.text = level.ToString();
-        linesText.text = lineCleared.ToString();
-    }
-    public void ResetScore()
-    {
-        score = 0;
-        level = 1;
-        lineCleared = 0;
-        linePerLevel = 10;
         UpdateScoreUI();
     }
 }

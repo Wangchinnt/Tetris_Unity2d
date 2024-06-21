@@ -3,9 +3,9 @@ using UnityEngine.Tilemaps;
 
 public class Ghost : MonoBehaviour
 {
-    public Tile tile;
-    public Board mainBoard;
-    public Piece trackingPiece;
+    [SerializeField] Tile tile;
+    [SerializeField] Board mainBoard;
+    [SerializeField] Piece trackingPiece;
 
     public Tilemap tilemap { get; private set; }
     public Vector3Int[] cells { get; private set; }
